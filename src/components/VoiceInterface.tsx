@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Mic, MicOff, VolumeX } from "lucide-react";
 import "./VoiceInterface.css";
 
 interface VoiceInterfaceProps {
@@ -45,7 +45,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       setTranscript("");
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       let finalTranscript = "";
       let interimTranscript = "";
 
@@ -73,7 +73,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
       }
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
       setIsListening(false);
       setTranscript("");

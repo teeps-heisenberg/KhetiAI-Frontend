@@ -1,12 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Mic,
-  MicOff,
-  Send,
-  Camera,
-  Sparkles,
-  MessageCircle,
-} from "lucide-react";
+import { Mic, Send, Camera, Sparkles, MessageCircle } from "lucide-react";
 import ChatInterface from "../components/ChatInterface";
 import VoiceInterface from "../components/VoiceInterface";
 import CameraInterface from "../components/CameraInterface";
@@ -26,7 +19,7 @@ const Home: React.FC = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
