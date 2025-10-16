@@ -12,7 +12,7 @@ interface Message {
 interface ChatInterfaceProps {
   messages: Message[];
   isLoading: boolean;
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
