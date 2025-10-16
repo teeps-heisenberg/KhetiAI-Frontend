@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Mic, MicOff, VolumeX } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./VoiceInterface.css";
 
 interface VoiceInterfaceProps {
@@ -13,6 +14,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   isListening,
   setIsListening,
 }) => {
+  const { t, i18n } = useTranslation();
   const [isSupported, setIsSupported] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,9 +28,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
   const startListening = () => {
     if (!isSupported) {
-      alert(
-        "Speech recognition is not supported in your browser. Please use Chrome or Edge."
-      );
+      alert(t("voice.browserError"));
       return;
     }
 
@@ -38,7 +38,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
 
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = "en-US"; // You can change this to support multiple languages
+    // Set language based on current locale
+    recognition.lang = i18n.language === "ur" ? "ur-PK" : "en-US";
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -91,9 +92,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     return (
       <div className="voice-interface">
         <div className="voice-fallback">
-          <p>
-            Speech recognition not supported. Please use the text input instead.
-          </p>
+          <p>{t("voice.notSupported")}</p>
         </div>
       </div>
     );
@@ -121,16 +120,18 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         <div className="voice-status">
           {isProcessing ? (
             <span className="status-text processing">
-              Processing your message...
+              {t("voice.processing")}
             </span>
           ) : isListening ? (
             <span className="status-text listening">
-              Listening... Speak now
+              {t("voice.listening")}
             </span>
           ) : transcript ? (
-            <span className="status-text">Tap to send: "{transcript}"</span>
+            <span className="status-text">
+              {t("voice.tapToSend")} "{transcript}"
+            </span>
           ) : (
-            <span className="status-text">Tap to start voice input</span>
+            <span className="status-text">{t("voice.tapToStart")}</span>
           )}
         </div>
       </div>

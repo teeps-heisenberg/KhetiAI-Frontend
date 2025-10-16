@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, Send, Camera, Sparkles, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ChatInterface from "../components/ChatInterface";
 import VoiceInterface from "../components/VoiceInterface";
 import CameraInterface from "../components/CameraInterface";
 import "./Home.css";
 
 const Home: React.FC = () => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<
     Array<{
       id: string;
@@ -48,11 +50,11 @@ const Home: React.FC = () => {
     // Simulate AI response (replace with actual API call)
     setTimeout(() => {
       const responses = [
-        "Based on your crop conditions, I recommend checking the soil moisture levels. The ideal range for most crops is between 40-60%.",
-        "Your crops appear healthy! I suggest monitoring for any signs of pests in the next few days.",
-        "The weather forecast looks favorable for your current growth stage. Consider applying organic fertilizer this week.",
-        "I notice some yellowing in the leaves. This could indicate a nutrient deficiency. Would you like me to suggest a treatment plan?",
-        "Your irrigation schedule seems optimal. Keep maintaining this pattern for the next two weeks.",
+        t("responses.soilMoisture"),
+        t("responses.cropsHealthy"),
+        t("responses.weatherFavorable"),
+        t("responses.yellowing"),
+        t("responses.irrigation"),
       ];
       const randomResponse =
         responses[Math.floor(Math.random() * responses.length)];
@@ -69,14 +71,11 @@ const Home: React.FC = () => {
   const handleCameraCapture = (imageData: string) => {
     // Handle camera capture
     console.log("Camera captured:", imageData);
-    addMessage("Analyzing crop image...", "user");
+    addMessage(t("responses.analyzing"), "user");
     setIsLoading(true);
 
     setTimeout(() => {
-      addMessage(
-        "I can see healthy growth patterns in your crops. The leaves show good color and structure. I recommend continuing your current care routine and monitoring for any changes in the next week.",
-        "assistant"
-      );
+      addMessage(t("responses.imageAnalysis"), "assistant");
       setIsLoading(false);
     }, 2000);
   };
@@ -89,16 +88,13 @@ const Home: React.FC = () => {
           <div className="hero-content">
             <div className="hero-badge">
               <Sparkles size={16} />
-              <span>AI-Powered Agriculture Assistant</span>
+              <span>{t("home.badge")}</span>
             </div>
             <h1 className="hero-title">
-              Welcome to <span className="gradient-text">KhetiAI</span>
+              {t("home.title")}{" "}
+              <span className="gradient-text">{t("home.titleHighlight")}</span>
             </h1>
-            <p className="hero-description">
-              Your intelligent farming companion that helps you make data-driven
-              decisions through natural voice communication and smart crop
-              analysis.
-            </p>
+            <p className="hero-description">{t("home.description")}</p>
 
             {/* Input Mode Selector */}
             <div className="input-mode-selector">
@@ -107,14 +103,14 @@ const Home: React.FC = () => {
                 onClick={() => setInputMode("voice")}
               >
                 <Mic size={18} />
-                Voice First
+                {t("home.voiceFirst")}
               </button>
               <button
                 className={`mode-btn ${inputMode === "text" ? "active" : ""}`}
                 onClick={() => setInputMode("text")}
               >
                 <MessageCircle size={18} />
-                Text Chat
+                {t("home.textChat")}
               </button>
             </div>
           </div>
@@ -128,25 +124,22 @@ const Home: React.FC = () => {
                 <div className="welcome-icon">
                   <Sparkles size={48} />
                 </div>
-                <h3>Ready to help with your farming needs!</h3>
-                <p>
-                  Ask me about crop health, weather predictions, soil
-                  conditions, or any farming question you have.
-                </p>
+                <h3>{t("home.welcomeTitle")}</h3>
+                <p>{t("home.welcomeDescription")}</p>
                 <div className="quick-actions">
                   <button
                     className="quick-action-btn"
                     onClick={() => setIsCameraOpen(true)}
                   >
                     <Camera size={16} />
-                    Analyze Crop
+                    {t("home.analyzeCrop")}
                   </button>
                   <button
                     className="quick-action-btn"
                     onClick={() => setInputMode("voice")}
                   >
                     <Mic size={16} />
-                    Start Voice Chat
+                    {t("home.startVoiceChat")}
                   </button>
                 </div>
               </div>
@@ -171,7 +164,7 @@ const Home: React.FC = () => {
               <div className="text-input-container">
                 <input
                   type="text"
-                  placeholder="Ask about your crops, weather, or farming..."
+                  placeholder={t("home.textInputPlaceholder")}
                   className="text-input"
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && e.currentTarget.value.trim()) {

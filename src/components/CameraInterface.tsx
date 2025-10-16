@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Camera, X, RotateCcw, Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./CameraInterface.css";
 
 interface CameraInterfaceProps {
@@ -11,6 +12,7 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
   onClose,
   onCapture,
 }) => {
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -33,7 +35,7 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
       }
     } catch (error) {
       console.error("Error accessing camera:", error);
-      alert("Unable to access camera. Please check permissions.");
+      alert(t("camera.permissionError"));
     }
   };
 
@@ -93,7 +95,7 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
     <div className="camera-modal-overlay">
       <div className="camera-modal">
         <div className="camera-header">
-          <h3>Analyze Your Crop</h3>
+          <h3>{t("camera.title")}</h3>
           <button className="close-btn" onClick={handleClose}>
             <X size={20} />
           </button>
@@ -116,9 +118,7 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
                   <div className="corner bottom-left"></div>
                   <div className="corner bottom-right"></div>
                 </div>
-                <p className="capture-instruction">
-                  Position your crop in the frame and tap capture
-                </p>
+                <p className="capture-instruction">{t("camera.instruction")}</p>
               </div>
             </div>
           ) : (
@@ -137,11 +137,11 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
             <div className="capture-actions">
               <button className="retake-btn" onClick={retakePhoto}>
                 <RotateCcw size={20} />
-                Retake
+                {t("camera.retake")}
               </button>
               <button className="confirm-btn" onClick={confirmCapture}>
                 <Check size={20} />
-                Analyze
+                {t("camera.analyze")}
               </button>
             </div>
           )}

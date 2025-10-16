@@ -1,5 +1,6 @@
 import React from "react";
 import { Bot, User, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./ChatInterface.css";
 
 interface Message {
@@ -20,6 +21,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   isLoading,
   messagesEndRef,
 }) => {
+  const { t } = useTranslation();
+
   const formatTime = (timestamp: Date) => {
     return timestamp.toLocaleTimeString([], {
       hour: "2-digit",
@@ -54,7 +57,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <div className="message-bubble loading">
               <div className="typing-indicator">
                 <Loader2 size={16} className="animate-spin" />
-                <span>KhetiAI is thinking...</span>
+                <span>{t("chat.thinking")}</span>
               </div>
             </div>
           </div>

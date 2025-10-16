@@ -1,0 +1,93 @@
+{
+  "layout": {
+    "appName": "KhetiAI",
+    "home": "Home",
+    "about": "About",
+    "footer": "Making agriculture smarter and more sustainable."
+  },
+  "home": {
+    "badge": "AI-Powered Agriculture Assistant",
+    "title": "Welcome to",
+    "titleHighlight": "KhetiAI",
+    "description": "Your intelligent farming companion that helps you make data-driven decisions through natural voice communication and smart crop analysis.",
+    "voiceFirst": "Voice First",
+    "textChat": "Text Chat",
+    "welcomeTitle": "Ready to help with your farming needs!",
+    "welcomeDescription": "Ask me about crop health, weather predictions, soil conditions, or any farming question you have.",
+    "analyzeCrop": "Analyze Crop",
+    "startVoiceChat": "Start Voice Chat",
+    "textInputPlaceholder": "Ask about your crops, weather, or farming..."
+  },
+  "about": {
+    "title": "About KhetiAI",
+    "description": "KhetiAI is an intelligent agricultural assistant designed to revolutionize farming through AI-powered insights, natural communication, and smart crop analysis.",
+    "mission": "Our Mission",
+    "missionText": "We believe that every farmer deserves access to cutting-edge agricultural technology. KhetiAI bridges the gap between traditional farming wisdom and modern AI capabilities, making sustainable and profitable agriculture accessible to farmers worldwide.",
+    "innovationTitle": "Innovation",
+    "innovationDescription": "Leveraging the latest AI technology to solve real farming challenges",
+    "accessibilityTitle": "Accessibility",
+    "accessibilityDescription": "Making advanced farming tools available to farmers of all backgrounds",
+    "resultsTitle": "Results",
+    "resultsDescription": "Delivering measurable improvements in crop yield and farming efficiency",
+    "keyFeatures": "Key Features",
+    "keyFeaturesDescription": "Discover how KhetiAI transforms your farming experience",
+    "voiceInterface": "Voice-First Interface",
+    "voiceInterfaceDescription": "Natural communication in local languages makes farming advice accessible to everyone, regardless of literacy level.",
+    "smartAnalysis": "Smart Crop Analysis",
+    "smartAnalysisDescription": "Camera-based analysis provides instant insights on crop health, growth progress, and potential issues.",
+    "aiPredictions": "AI-Powered Predictions",
+    "aiPredictionsDescription": "Advanced algorithms predict optimal sowing and harvesting periods with accurate ripening time estimates.",
+    "yieldOptimization": "Yield Optimization",
+    "yieldOptimizationDescription": "Real-time recommendations help improve crop yield through data-driven farming decisions.",
+    "localizedGuidance": "Localized Guidance",
+    "localizedGuidanceDescription": "Personalized advice that adapts to your specific crop conditions and local farming practices.",
+    "sustainableFarming": "Sustainable Farming",
+    "sustainableFarmingDescription": "Promotes eco-friendly practices that protect the environment while maximizing productivity.",
+    "impactNumbers": "Impact in Numbers",
+    "farmersHelped": "Farmers Helped",
+    "cropVarieties": "Crop Varieties",
+    "accuracyRate": "Accuracy Rate",
+    "aiSupport": "AI Support",
+    "howItWorks": "How It Works",
+    "howItWorksDescription": "Simple steps to smarter farming",
+    "step1Title": "Ask Questions",
+    "step1Description": "Use your voice or text to ask about your crops, weather, or farming challenges.",
+    "step2Title": "Capture Images",
+    "step2Description": "Take photos of your crops for instant health analysis and growth monitoring.",
+    "step3Title": "Get Insights",
+    "step3Description": "Receive personalized recommendations and predictions tailored to your farm.",
+    "step4Title": "Apply & Improve",
+    "step4Description": "Implement the suggestions and watch your farming efficiency and yield improve.",
+    "ctaTitle": "Ready to Transform Your Farming?",
+    "ctaDescription": "Join thousands of farmers who are already using KhetiAI to make smarter, more sustainable farming decisions.",
+    "ctaButton": "Start Your Journey"
+  },
+  "chat": {
+    "thinking": "KhetiAI is thinking..."
+  },
+  "camera": {
+    "title": "Analyze Your Crop",
+    "instruction": "Position your crop in the frame and tap capture",
+    "retake": "Retake",
+    "analyze": "Analyze",
+    "permissionError": "Unable to access camera. Please check permissions."
+  },
+  "voice": {
+    "notSupported": "Speech recognition not supported. Please use the text input instead.",
+    "processing": "Processing your message...",
+    "listening": "Listening... Speak now",
+    "tapToSend": "Tap to send:",
+    "tapToStart": "Tap to start voice input",
+    "browserError": "Speech recognition is not supported in your browser. Please use Chrome or Edge."
+  },
+  "responses": {
+    "soilMoisture": "Based on your crop conditions, I recommend checking the soil moisture levels. The ideal range for most crops is between 40-60%.",
+    "cropsHealthy": "Your crops appear healthy! I suggest monitoring for any signs of pests in the next few days.",
+    "weatherFavorable": "The weather forecast looks favorable for your current growth stage. Consider applying organic fertilizer this week.",
+    "yellowing": "I notice some yellowing in the leaves. This could indicate a nutrient deficiency. Would you like me to suggest a treatment plan?",
+    "irrigation": "Your irrigation schedule seems optimal. Keep maintaining this pattern for the next two weeks.",
+    "analyzing": "Analyzing crop image...",
+    "imageAnalysis": "I can see healthy growth patterns in your crops. The leaves show good color and structure. I recommend continuing your current care routine and monitoring for any changes in the next week."
+  }
+}
+

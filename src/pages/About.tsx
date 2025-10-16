@@ -11,53 +11,50 @@ import {
   Users,
   BarChart3,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import "./About.css";
 
 const About: React.FC = () => {
+  const { t } = useTranslation();
+
   const features = [
     {
       icon: <Mic size={32} />,
-      title: "Voice-First Interface",
-      description:
-        "Natural communication in local languages makes farming advice accessible to everyone, regardless of literacy level.",
+      title: t("about.voiceInterface"),
+      description: t("about.voiceInterfaceDescription"),
     },
     {
       icon: <Camera size={32} />,
-      title: "Smart Crop Analysis",
-      description:
-        "Camera-based analysis provides instant insights on crop health, growth progress, and potential issues.",
+      title: t("about.smartAnalysis"),
+      description: t("about.smartAnalysisDescription"),
     },
     {
       icon: <Brain size={32} />,
-      title: "AI-Powered Predictions",
-      description:
-        "Advanced algorithms predict optimal sowing and harvesting periods with accurate ripening time estimates.",
+      title: t("about.aiPredictions"),
+      description: t("about.aiPredictionsDescription"),
     },
     {
       icon: <TrendingUp size={32} />,
-      title: "Yield Optimization",
-      description:
-        "Real-time recommendations help improve crop yield through data-driven farming decisions.",
+      title: t("about.yieldOptimization"),
+      description: t("about.yieldOptimizationDescription"),
     },
     {
       icon: <Globe size={32} />,
-      title: "Localized Guidance",
-      description:
-        "Personalized advice that adapts to your specific crop conditions and local farming practices.",
+      title: t("about.localizedGuidance"),
+      description: t("about.localizedGuidanceDescription"),
     },
     {
       icon: <Shield size={32} />,
-      title: "Sustainable Farming",
-      description:
-        "Promotes eco-friendly practices that protect the environment while maximizing productivity.",
+      title: t("about.sustainableFarming"),
+      description: t("about.sustainableFarmingDescription"),
     },
   ];
 
   const stats = [
-    { number: "10K+", label: "Farmers Helped" },
-    { number: "50+", label: "Crop Varieties" },
-    { number: "95%", label: "Accuracy Rate" },
-    { number: "24/7", label: "AI Support" },
+    { number: "10K+", label: t("about.farmersHelped") },
+    { number: "50+", label: t("about.cropVarieties") },
+    { number: "95%", label: t("about.accuracyRate") },
+    { number: "24/7", label: t("about.aiSupport") },
   ];
 
   return (
@@ -69,55 +66,36 @@ const About: React.FC = () => {
             <div className="hero-icon">
               <Leaf size={48} />
             </div>
-            <h1>About KhetiAI</h1>
-            <p className="hero-description">
-              KhetiAI is an intelligent agricultural assistant designed to
-              revolutionize farming through AI-powered insights, natural
-              communication, and smart crop analysis.
-            </p>
+            <h1>{t("about.title")}</h1>
+            <p className="hero-description">{t("about.description")}</p>
           </div>
         </div>
 
         {/* Mission Section */}
         <div className="mission-section">
           <div className="section-content">
-            <h2>Our Mission</h2>
-            <p className="mission-text">
-              We believe that every farmer deserves access to cutting-edge
-              agricultural technology. KhetiAI bridges the gap between
-              traditional farming wisdom and modern AI capabilities, making
-              sustainable and profitable agriculture accessible to farmers
-              worldwide.
-            </p>
+            <h2>{t("about.mission")}</h2>
+            <p className="mission-text">{t("about.missionText")}</p>
             <div className="mission-values">
               <div className="value-item">
                 <Zap className="value-icon" />
                 <div>
-                  <h4>Innovation</h4>
-                  <p>
-                    Leveraging the latest AI technology to solve real farming
-                    challenges
-                  </p>
+                  <h4>{t("about.innovationTitle")}</h4>
+                  <p>{t("about.innovationDescription")}</p>
                 </div>
               </div>
               <div className="value-item">
                 <Users className="value-icon" />
                 <div>
-                  <h4>Accessibility</h4>
-                  <p>
-                    Making advanced farming tools available to farmers of all
-                    backgrounds
-                  </p>
+                  <h4>{t("about.accessibilityTitle")}</h4>
+                  <p>{t("about.accessibilityDescription")}</p>
                 </div>
               </div>
               <div className="value-item">
                 <BarChart3 className="value-icon" />
                 <div>
-                  <h4>Results</h4>
-                  <p>
-                    Delivering measurable improvements in crop yield and farming
-                    efficiency
-                  </p>
+                  <h4>{t("about.resultsTitle")}</h4>
+                  <p>{t("about.resultsDescription")}</p>
                 </div>
               </div>
             </div>
@@ -127,8 +105,8 @@ const About: React.FC = () => {
         {/* Features Section */}
         <div className="features-section">
           <div className="section-header">
-            <h2>Key Features</h2>
-            <p>Discover how KhetiAI transforms your farming experience</p>
+            <h2>{t("about.keyFeatures")}</h2>
+            <p>{t("about.keyFeaturesDescription")}</p>
           </div>
           <div className="features-grid">
             {features.map((feature, index) => (
@@ -144,7 +122,7 @@ const About: React.FC = () => {
         {/* Stats Section */}
         <div className="stats-section">
           <div className="section-content">
-            <h2>Impact in Numbers</h2>
+            <h2>{t("about.impactNumbers")}</h2>
             <div className="stats-grid">
               {stats.map((stat, index) => (
                 <div key={index} className="stat-item">
@@ -159,48 +137,36 @@ const About: React.FC = () => {
         {/* How It Works Section */}
         <div className="how-it-works-section">
           <div className="section-header">
-            <h2>How It Works</h2>
-            <p>Simple steps to smarter farming</p>
+            <h2>{t("about.howItWorks")}</h2>
+            <p>{t("about.howItWorksDescription")}</p>
           </div>
           <div className="steps-container">
             <div className="step">
               <div className="step-number">1</div>
               <div className="step-content">
-                <h3>Ask Questions</h3>
-                <p>
-                  Use your voice or text to ask about your crops, weather, or
-                  farming challenges.
-                </p>
+                <h3>{t("about.step1Title")}</h3>
+                <p>{t("about.step1Description")}</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">2</div>
               <div className="step-content">
-                <h3>Capture Images</h3>
-                <p>
-                  Take photos of your crops for instant health analysis and
-                  growth monitoring.
-                </p>
+                <h3>{t("about.step2Title")}</h3>
+                <p>{t("about.step2Description")}</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">3</div>
               <div className="step-content">
-                <h3>Get Insights</h3>
-                <p>
-                  Receive personalized recommendations and predictions tailored
-                  to your farm.
-                </p>
+                <h3>{t("about.step3Title")}</h3>
+                <p>{t("about.step3Description")}</p>
               </div>
             </div>
             <div className="step">
               <div className="step-number">4</div>
               <div className="step-content">
-                <h3>Apply & Improve</h3>
-                <p>
-                  Implement the suggestions and watch your farming efficiency
-                  and yield improve.
-                </p>
+                <h3>{t("about.step4Title")}</h3>
+                <p>{t("about.step4Description")}</p>
               </div>
             </div>
           </div>
@@ -209,12 +175,9 @@ const About: React.FC = () => {
         {/* CTA Section */}
         <div className="cta-section">
           <div className="cta-content">
-            <h2>Ready to Transform Your Farming?</h2>
-            <p>
-              Join thousands of farmers who are already using KhetiAI to make
-              smarter, more sustainable farming decisions.
-            </p>
-            <button className="cta-button">Start Your Journey</button>
+            <h2>{t("about.ctaTitle")}</h2>
+            <p>{t("about.ctaDescription")}</p>
+            <button className="cta-button">{t("about.ctaButton")}</button>
           </div>
         </div>
       </div>
