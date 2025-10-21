@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next";
 import ChatInterface from "../components/ChatInterface";
 import VoiceInterface from "../components/VoiceInterface";
 import CameraInterface from "../components/CameraInterface";
+import apiService from "../services/api";
 import "./Home.css";
 
 const Home: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState<
     Array<{
       id: string;
@@ -47,37 +48,83 @@ const Home: React.FC = () => {
     addMessage(transcript, "user");
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const responses = [
-        t("responses.soilMoisture"),
-        t("responses.cropsHealthy"),
-        t("responses.weatherFavorable"),
-        t("responses.yellowing"),
-        t("responses.irrigation"),
-      ];
-      const randomResponse =
-        responses[Math.floor(Math.random() * responses.length)];
-      addMessage(randomResponse, "assistant");
+    try {
+      // Send message to backend API
+      const response = await apiService.sendChatMessage(
+        transcript,
+        i18n.language,
+        "voice"
+      );
+
+      // Add AI response to chat
+      addMessage(response.response, "assistant");
+
+      // Play audio response if available
+      if (response.audio_response) {
+        apiService.playAudioFromBase64(response.audio_response);
+      }
+    } catch (error) {
+      console.error("Error processing voice input:", error);
+      addMessage(
+        t("responses.error") || "Sorry, I couldn't process that. Please try again.",
+        "assistant"
+      );
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleTextInput = async (message: string) => {
     if (!message.trim()) return;
-    await handleVoiceInput(message);
+
+    addMessage(message, "user");
+    setIsLoading(true);
+
+    try {
+      // Send text message to backend API
+      const response = await apiService.sendChatMessage(
+        message,
+        i18n.language,
+        "text"
+      );
+
+      // Add AI response to chat
+      addMessage(response.response, "assistant");
+    } catch (error) {
+      console.error("Error processing text input:", error);
+      addMessage(
+        t("responses.error") || "Sorry, I couldn't process that. Please try again.",
+        "assistant"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCameraCapture = (imageData: string) => {
-    // Handle camera capture
-    console.log("Camera captured:", imageData);
+  const handleCameraCapture = async (imageData: string) => {
     addMessage(t("responses.analyzing"), "user");
     setIsLoading(true);
 
-    setTimeout(() => {
-      addMessage(t("responses.imageAnalysis"), "assistant");
+    try {
+      // Convert base64 to blob
+      const base64Response = await fetch(imageData);
+      const blob = await base64Response.blob();
+
+      // Send to backend for analysis
+      const response = await apiService.analyzeCropImage(blob, i18n.language);
+
+      // Format the response message
+      const analysisMessage = `${response.recommendations}`;
+      addMessage(analysisMessage, "assistant");
+    } catch (error) {
+      console.error("Error analyzing crop image:", error);
+      addMessage(
+        t("responses.error") || "Sorry, I couldn't analyze the image. Please try again.",
+        "assistant"
+      );
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (

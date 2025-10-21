@@ -70,7 +70,14 @@
     "instruction": "Position your crop in the frame and tap capture",
     "retake": "Retake",
     "analyze": "Analyze",
-    "permissionError": "Unable to access camera. Please check permissions."
+    "permissionError": "Unable to access camera. Please check permissions.",
+    "useCamera": "Use Camera",
+    "uploadFile": "Upload File",
+    "uploadInstruction": "Click below to select an image",
+    "uploadHint": "Supports: JPG, PNG, WEBP (Max 10MB)",
+    "selectFile": "Select File",
+    "invalidFileType": "Please select an image file (JPG, PNG, or WEBP)",
+    "fileTooLarge": "File size must be less than 10MB"
   },
   "voice": {
     "notSupported": "Speech recognition not supported. Please use the text input instead.",
@@ -87,7 +94,8 @@
     "yellowing": "I notice some yellowing in the leaves. This could indicate a nutrient deficiency. Would you like me to suggest a treatment plan?",
     "irrigation": "Your irrigation schedule seems optimal. Keep maintaining this pattern for the next two weeks.",
     "analyzing": "Analyzing crop image...",
-    "imageAnalysis": "I can see healthy growth patterns in your crops. The leaves show good color and structure. I recommend continuing your current care routine and monitoring for any changes in the next week."
+    "imageAnalysis": "I can see healthy growth patterns in your crops. The leaves show good color and structure. I recommend continuing your current care routine and monitoring for any changes in the next week.",
+    "error": "Sorry, I couldn't process that. Please try again."
   }
 }
 

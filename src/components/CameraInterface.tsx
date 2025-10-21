@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Camera, X, RotateCcw, Check } from "lucide-react";
+import { Camera, X, RotateCcw, Check, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./CameraInterface.css";
 
@@ -15,9 +15,12 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isCaptured, setIsCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string>("");
+  const [uploadMode, setUploadMode] = useState<"camera" | "upload">("camera");
+  const [isCameraStarted, setIsCameraStarted] = useState(false);
 
   const startCamera = async () => {
     try {
@@ -30,6 +33,7 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
       });
 
       setStream(mediaStream);
+      setIsCameraStarted(true);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -37,6 +41,37 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
       console.error("Error accessing camera:", error);
       alert(t("camera.permissionError"));
     }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert(t("camera.invalidFileType") || "Please select an image file");
+        return;
+      }
+
+      // Validate file size (10MB max)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        alert(t("camera.fileTooLarge") || "File size must be less than 10MB");
+        return;
+      }
+
+      // Read file and convert to base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageData = e.target?.result as string;
+        setCapturedImage(imageData);
+        setIsCaptured(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const stopCamera = () => {
@@ -83,13 +118,15 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
     onClose();
   };
 
-  // Start camera when component mounts
+  // Start camera when component mounts (only if camera mode)
   React.useEffect(() => {
-    startCamera();
+    if (uploadMode === "camera") {
+      startCamera();
+    }
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [uploadMode]);
 
   return (
     <div className="camera-modal-overlay">
@@ -101,26 +138,58 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
           </button>
         </div>
 
+        {/* Mode Selection */}
+        {!isCaptured && (
+          <div className="upload-mode-selector">
+            <button
+              className={`mode-btn ${uploadMode === "camera" ? "active" : ""}`}
+              onClick={() => setUploadMode("camera")}
+            >
+              <Camera size={18} />
+              {t("camera.useCamera") || "Use Camera"}
+            </button>
+            <button
+              className={`mode-btn ${uploadMode === "upload" ? "active" : ""}`}
+              onClick={() => setUploadMode("upload")}
+            >
+              <Upload size={18} />
+              {t("camera.uploadFile") || "Upload File"}
+            </button>
+          </div>
+        )}
+
         <div className="camera-content">
           {!isCaptured ? (
-            <div className="camera-preview">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="camera-video"
-              />
-              <div className="camera-overlay">
-                <div className="focus-frame">
-                  <div className="corner top-left"></div>
-                  <div className="corner top-right"></div>
-                  <div className="corner bottom-left"></div>
-                  <div className="corner bottom-right"></div>
+            uploadMode === "camera" ? (
+              <div className="camera-preview">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="camera-video"
+                />
+                <div className="camera-overlay">
+                  <div className="focus-frame">
+                    <div className="corner top-left"></div>
+                    <div className="corner top-right"></div>
+                    <div className="corner bottom-left"></div>
+                    <div className="corner bottom-right"></div>
+                  </div>
+                  <p className="capture-instruction">{t("camera.instruction")}</p>
                 </div>
-                <p className="capture-instruction">{t("camera.instruction")}</p>
               </div>
-            </div>
+            ) : (
+              <div className="upload-area">
+                <div className="upload-placeholder">
+                  <Upload size={48} />
+                  <p>{t("camera.uploadInstruction") || "Click below to select an image"}</p>
+                  <p className="upload-hint">
+                    {t("camera.uploadHint") || "Supports: JPG, PNG, WEBP (Max 10MB)"}
+                  </p>
+                </div>
+              </div>
+            )
           ) : (
             <div className="captured-image">
               <img src={capturedImage} alt="Captured crop" />
@@ -130,9 +199,16 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
 
         <div className="camera-controls">
           {!isCaptured ? (
-            <button className="capture-btn" onClick={captureImage}>
-              <Camera size={24} />
-            </button>
+            uploadMode === "camera" ? (
+              <button className="capture-btn" onClick={captureImage}>
+                <Camera size={24} />
+              </button>
+            ) : (
+              <button className="upload-btn" onClick={triggerFileUpload}>
+                <Upload size={20} />
+                {t("camera.selectFile") || "Select File"}
+              </button>
+            )
           ) : (
             <div className="capture-actions">
               <button className="retake-btn" onClick={retakePhoto}>
@@ -146,6 +222,15 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
             </div>
           )}
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          style={{ display: "none" }}
+        />
 
         {/* Hidden canvas for image capture */}
         <canvas ref={canvasRef} style={{ display: "none" }} />
