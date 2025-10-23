@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, Send, Camera, Sparkles, MessageCircle, Image as ImageIcon } from "lucide-react";
+import { Mic, Send, Sparkles, MessageCircle, Image as ImageIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ChatInterface from "../components/ChatInterface";
 import VoiceInterface from "../components/VoiceInterface";

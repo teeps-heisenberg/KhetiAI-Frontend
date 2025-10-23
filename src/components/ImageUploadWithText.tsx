@@ -17,7 +17,6 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   const [imageData, setImageData] = useState<string>("");
   const [uploadMode, setUploadMode] = useState<"camera" | "upload">("upload");
   const [isCaptured, setIsCaptured] = useState(false);
-  const [isCameraStarted, setIsCameraStarted] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +34,6 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
       });
 
       setStream(mediaStream);
-      setIsCameraStarted(true);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -52,24 +50,6 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
     }
   };
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL("image/jpeg", 0.8);
-        setImageData(imageData);
-        setIsCaptured(true);
-        stopCamera();
-      }
-    }
-  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

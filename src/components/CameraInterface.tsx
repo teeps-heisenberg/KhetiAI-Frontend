@@ -20,7 +20,6 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
   const [isCaptured, setIsCaptured] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [uploadMode, setUploadMode] = useState<"camera" | "upload">("camera");
-  const [isCameraStarted, setIsCameraStarted] = useState(false);
 
   const startCamera = async () => {
     try {
@@ -33,7 +32,6 @@ const CameraInterface: React.FC<CameraInterfaceProps> = ({
       });
 
       setStream(mediaStream);
-      setIsCameraStarted(true);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
