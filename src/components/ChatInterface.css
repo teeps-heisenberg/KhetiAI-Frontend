@@ -1,4 +1,64 @@
 /* Chat Interface Styles */
+
+/* Image display in messages */
+.message-image {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.crop-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.image-analysis-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  z-index: 1;
+}
+
+.health-score {
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+.disease-warning {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive image display */
+@media (max-width: 640px) {
+  .crop-image {
+    max-width: 100%;
+  }
+  
+  .image-analysis-badge {
+    position: static;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+}
 .chat-interface {
   display: flex;
   flex-direction: column;

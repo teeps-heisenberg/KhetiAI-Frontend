@@ -112,16 +112,22 @@ class ApiService {
   }
 
   /**
-   * Analyze crop image
+   * Analyze crop image with optional user message
    */
   async analyzeCropImage(
     imageFile: Blob | File,
-    language: string
+    language: string,
+    userMessage?: string
   ): Promise<CropAnalysisResponse> {
     try {
       const formData = new FormData();
       formData.append('file', imageFile, 'crop_image.jpg');
       formData.append('language', language);
+      
+      // Add user message if provided
+      if (userMessage && userMessage.trim()) {
+        formData.append('user_message', userMessage.trim());
+      }
 
       const response = await fetch(`${this.baseUrl}${API_CONFIG.ENDPOINTS.CROP_ANALYSIS}`, {
         method: 'POST',

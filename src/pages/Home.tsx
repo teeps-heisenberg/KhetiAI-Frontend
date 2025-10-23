@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, Send, Camera, Sparkles, MessageCircle } from "lucide-react";
+import { Mic, Send, Camera, Sparkles, MessageCircle, Image as ImageIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ChatInterface from "../components/ChatInterface";
 import VoiceInterface from "../components/VoiceInterface";
 import CameraInterface from "../components/CameraInterface";
+import ImageUploadWithText from "../components/ImageUploadWithText";
 import apiService from "../services/api";
 import "./Home.css";
 
@@ -15,11 +16,18 @@ const Home: React.FC = () => {
       type: "user" | "assistant";
       content: string;
       timestamp: Date;
+      imageUrl?: string;
+      imageAnalysis?: {
+        health_score?: number;
+        disease_detected?: string;
+        growth_stage?: string;
+      };
     }>
   >([]);
 
   const [isListening, setIsListening] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
   const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -32,12 +40,23 @@ const Home: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const addMessage = (content: string, type: "user" | "assistant") => {
+  const addMessage = (
+    content: string, 
+    type: "user" | "assistant", 
+    imageUrl?: string,
+    imageAnalysis?: {
+      health_score?: number;
+      disease_detected?: string;
+      growth_stage?: string;
+    }
+  ) => {
     const newMessage = {
       id: Date.now().toString(),
       type,
       content,
       timestamp: new Date(),
+      imageUrl,
+      imageAnalysis,
     };
     setMessages((prev) => [...prev, newMessage]);
   };
@@ -102,7 +121,7 @@ const Home: React.FC = () => {
   };
 
   const handleCameraCapture = async (imageData: string) => {
-    addMessage(t("responses.analyzing"), "user");
+    addMessage(t("responses.analyzing") || "Analyzing crop image...", "user", imageData);
     setIsLoading(true);
 
     try {
@@ -115,7 +134,11 @@ const Home: React.FC = () => {
 
       // Format the response message
       const analysisMessage = `${response.recommendations}`;
-      addMessage(analysisMessage, "assistant");
+      addMessage(analysisMessage, "assistant", undefined, {
+        health_score: response.health_score,
+        disease_detected: response.disease_detected,
+        growth_stage: response.growth_stage,
+      });
     } catch (error) {
       console.error("Error analyzing crop image:", error);
       addMessage(
@@ -124,6 +147,42 @@ const Home: React.FC = () => {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageWithText = async (text: string, imageData?: string) => {
+    if (imageData) {
+      // Add user message with image
+      addMessage(text || "Analyzing crop image...", "user", imageData);
+      setIsLoading(true);
+
+      try {
+        // Convert base64 to blob
+        const base64Response = await fetch(imageData);
+        const blob = await base64Response.blob();
+
+        // Send to backend for analysis with user message
+        const response = await apiService.analyzeCropImage(blob, i18n.language, text);
+
+        // Format the response message
+        const analysisMessage = `${response.recommendations}`;
+        addMessage(analysisMessage, "assistant", undefined, {
+          health_score: response.health_score,
+          disease_detected: response.disease_detected,
+          growth_stage: response.growth_stage,
+        });
+      } catch (error) {
+        console.error("Error analyzing crop image:", error);
+        addMessage(
+          t("responses.error") || "Sorry, I couldn't analyze the image. Please try again.",
+          "assistant"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (text.trim()) {
+      // Regular text message
+      handleTextInput(text);
     }
   };
 
@@ -176,17 +235,17 @@ const Home: React.FC = () => {
                 <div className="quick-actions">
                   <button
                     className="quick-action-btn"
-                    onClick={() => setIsCameraOpen(true)}
+                    onClick={() => setIsImageUploadOpen(true)}
                   >
-                    <Camera size={16} />
-                    {t("home.analyzeCrop")}
+                    <ImageIcon size={16} />
+                    {t("home.analyzeCrop") || "Analyze Crop"}
                   </button>
                   <button
                     className="quick-action-btn"
                     onClick={() => setInputMode("voice")}
                   >
                     <Mic size={16} />
-                    {t("home.startVoiceChat")}
+                    {t("home.startVoiceChat") || "Start Voice Chat"}
                   </button>
                 </div>
               </div>
@@ -236,13 +295,13 @@ const Home: React.FC = () => {
               </div>
             )}
 
-            {/* Camera Button */}
+            {/* Image Upload Button */}
             <button
               className="camera-btn"
-              onClick={() => setIsCameraOpen(true)}
-              title="Analyze crop with camera"
+              onClick={() => setIsImageUploadOpen(true)}
+              title="Upload image with message"
             >
-              <Camera size={20} />
+              <ImageIcon size={20} />
             </button>
           </div>
         </div>
@@ -252,6 +311,14 @@ const Home: React.FC = () => {
           <CameraInterface
             onClose={() => setIsCameraOpen(false)}
             onCapture={handleCameraCapture}
+          />
+        )}
+
+        {/* Image Upload with Text Modal */}
+        {isImageUploadOpen && (
+          <ImageUploadWithText
+            onSend={handleImageWithText}
+            onClose={() => setIsImageUploadOpen(false)}
           />
         )}
       </div>

@@ -8,6 +8,12 @@ interface Message {
   type: "user" | "assistant";
   content: string;
   timestamp: Date;
+  imageUrl?: string;
+  imageAnalysis?: {
+    health_score?: number;
+    disease_detected?: string;
+    growth_stage?: string;
+  };
 }
 
 interface ChatInterfaceProps {
@@ -39,6 +45,30 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
           <div className="message-content">
             <div className="message-bubble">
+              {/* Display image if present */}
+              {message.imageUrl && (
+                <div className="message-image">
+                  <img 
+                    src={message.imageUrl} 
+                    alt="Uploaded crop image" 
+                    className="crop-image"
+                  />
+                  {message.imageAnalysis && (
+                    <div className="image-analysis-badge">
+                      <span className="health-score">
+                        Health: {message.imageAnalysis.health_score?.toFixed(1)}%
+                      </span>
+                      {message.imageAnalysis.disease_detected && (
+                        <span className="disease-warning">
+                          Disease: {message.imageAnalysis.disease_detected}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Display text content */}
               <p>{message.content}</p>
               <span className="message-time">
                 {formatTime(message.timestamp)}
