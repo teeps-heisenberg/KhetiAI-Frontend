@@ -150,31 +150,78 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleImageWithText = async (text: string, imageData?: string) => {
-    if (imageData) {
-      // Add user message with image
-      addMessage(text || "Analyzing crop image...", "user", imageData);
+  const handleImageWithText = async (text: string, imageData?: string, audioData?: Blob) => {
+    if (imageData || audioData) {
       setIsLoading(true);
 
       try {
-        // Convert base64 to blob
-        const base64Response = await fetch(imageData);
-        const blob = await base64Response.blob();
+        let response;
 
-        // Send to backend for analysis with user message
-        const response = await apiService.analyzeCropImage(blob, i18n.language, text);
+        if (audioData && imageData) {
+          // Both voice and image provided
+          // Add user message with image (will show transcript after processing)
+          addMessage("Processing voice and image...", "user", imageData);
+          
+          const base64Response = await fetch(imageData);
+          const imageBlob = await base64Response.blob();
+          response = await apiService.sendVoiceMessageWithImage(audioData, imageBlob, i18n.language);
+          
+          // Update the last message with the transcript
+          setMessages((prev) => {
+            const updated = [...prev];
+            if (updated.length > 0) {
+              updated[updated.length - 1].content = response.transcript;
+            }
+            return updated;
+          });
+          
+          // Add AI response
+          addMessage(response.response, "assistant");
+          
+          // Play audio response if available
+          if (response.audio_response) {
+            apiService.playAudioFromBase64(response.audio_response);
+          }
+        } else if (audioData) {
+          // Only voice provided
+          addMessage("Processing voice...", "user");
+          
+          response = await apiService.sendChatVoice(audioData, i18n.language);
+          
+          // Update with transcript
+          setMessages((prev) => {
+            const updated = [...prev];
+            if (updated.length > 0) {
+              updated[updated.length - 1].content = response.transcript;
+            }
+            return updated;
+          });
+          
+          addMessage(response.response, "assistant");
+          
+          if (response.audio_response) {
+            apiService.playAudioFromBase64(response.audio_response);
+          }
+        } else if (imageData) {
+          // Only image provided
+          addMessage(text || "Analyzing crop image...", "user", imageData);
+          
+          const base64Response = await fetch(imageData);
+          const blob = await base64Response.blob();
+          response = await apiService.analyzeCropImage(blob, i18n.language, text);
 
-        // Format the response message
-        const analysisMessage = `${response.recommendations}`;
-        addMessage(analysisMessage, "assistant", undefined, {
-          health_score: response.health_score,
-          disease_detected: response.disease_detected,
-          growth_stage: response.growth_stage,
-        });
+          // Format the response message
+          const analysisMessage = `${response.recommendations}`;
+          addMessage(analysisMessage, "assistant", undefined, {
+            health_score: response.health_score,
+            disease_detected: response.disease_detected,
+            growth_stage: response.growth_stage,
+          });
+        }
       } catch (error) {
-        console.error("Error analyzing crop image:", error);
+        console.error("Error processing request:", error);
         addMessage(
-          t("responses.error") || "Sorry, I couldn't analyze the image. Please try again.",
+          t("responses.error") || "Sorry, I couldn't process that. Please try again.",
           "assistant"
         );
       } finally {

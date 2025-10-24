@@ -147,6 +147,47 @@ class ApiService {
   }
 
   /**
+   * Send voice message with image
+   */
+  async sendVoiceMessageWithImage(
+    audioBlob: Blob,
+    imageBlob: Blob,
+    language: string
+  ): Promise<VoiceChatResponse> {
+    try {
+      const formData = new FormData();
+      formData.append('audio_file', audioBlob, 'audio.webm');
+      formData.append('image', imageBlob, 'crop_image.jpg');
+      formData.append('language', language);
+
+      const response = await fetch(`${this.baseUrl}${API_CONFIG.ENDPOINTS.CHAT_VOICE}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to process voice message with image');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending voice message with image:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send voice message only (alias for sendVoiceMessage)
+   */
+  async sendChatVoice(
+    audioBlob: Blob,
+    language: string
+  ): Promise<VoiceChatResponse> {
+    return this.sendVoiceMessage(audioBlob, language);
+  }
+
+  /**
    * Play audio from base64 string
    */
   playAudioFromBase64(base64Audio: string): void {

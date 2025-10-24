@@ -251,11 +251,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
 .send-btn:hover {
   background-color: var(--primary-green-dark);
   transform: scale(1.05);
+}
+
+.send-btn:disabled {
+  background-color: var(--border-light);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .camera-btn {

@@ -1,10 +1,10 @@
 import React, { useState, useRef } from "react";
-import { Camera, Upload, X, Send, Image as ImageIcon } from "lucide-react";
+import { Camera, Upload, X, Send, Image as ImageIcon, Mic, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUploadWithText.css";
 
 interface ImageUploadWithTextProps {
-  onSend: (text: string, imageData?: string) => void;
+  onSend: (text: string, imageData?: string, audioData?: Blob) => void;
   onClose: () => void;
 }
 
@@ -17,11 +17,17 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   const [imageData, setImageData] = useState<string>("");
   const [uploadMode, setUploadMode] = useState<"camera" | "upload">("upload");
   const [isCaptured, setIsCaptured] = useState(false);
+  const [messageMode, setMessageMode] = useState<"text" | "voice">("text");
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startCamera = async () => {
     try {
@@ -90,10 +96,65 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(audioStream);
+      const audioChunks: BlobPart[] = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        setAudioBlob(audioBlob);
+        audioStream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      // Start recording timer
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      alert(t("voice.permissionError") || "Could not access microphone");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    }
+  };
+
+  const deleteRecording = () => {
+    setAudioBlob(null);
+    setRecordingTime(0);
+  };
+
   const handleSend = () => {
-    if (text.trim() || imageData) {
-      onSend(text.trim(), imageData || undefined);
+    if (messageMode === "text" && (text.trim() || imageData)) {
+      onSend(text.trim(), imageData || undefined, undefined);
       setText("");
+      setImageData("");
+      setIsCaptured(false);
+      onClose();
+    } else if (messageMode === "voice" && (audioBlob || imageData)) {
+      onSend("", imageData || undefined, audioBlob || undefined);
+      setAudioBlob(null);
       setImageData("");
       setIsCaptured(false);
       onClose();
@@ -102,6 +163,9 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
 
   const handleClose = () => {
     stopCamera();
+    if (isRecording) {
+      stopRecording();
+    }
     onClose();
   };
 
@@ -121,7 +185,7 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
     <div className="image-upload-modal-overlay">
       <div className="image-upload-modal">
         <div className="image-upload-header">
-          <h3>{t("imageUpload.title") || "Upload Image with Message"}</h3>
+          <h3>Upload Image with Message</h3>
           <button className="close-btn" onClick={handleClose}>
             <X size={20} />
           </button>
@@ -136,14 +200,14 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
                 onClick={() => setUploadMode("camera")}
               >
                 <Camera size={18} />
-                {t("camera.useCamera") || "Use Camera"}
+                Use Camera
               </button>
               <button
                 className={`mode-btn ${uploadMode === "upload" ? "active" : ""}`}
                 onClick={() => setUploadMode("upload")}
               >
                 <Upload size={18} />
-                {t("camera.uploadFile") || "Upload File"}
+                Upload File
               </button>
             </div>
           )}
@@ -168,7 +232,7 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
                       <div className="corner bottom-right"></div>
                     </div>
                     <p className="capture-instruction">
-                      {t("camera.instruction") || "Position your crop in the frame"}
+                      Position your crop in the frame
                     </p>
                   </div>
                 </div>
@@ -176,9 +240,9 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
                 <div className="upload-area" onClick={triggerFileUpload}>
                   <div className="upload-placeholder">
                     <Upload size={48} />
-                    <p>{t("camera.uploadInstruction") || "Click to select an image"}</p>
+                    <p>Click below to select an image</p>
                     <p className="upload-hint">
-                      {t("camera.uploadHint") || "Supports: JPG, PNG, WEBP (Max 10MB)"}
+                      Supports: JPG, PNG, WEBP (Max 10MB)
                     </p>
                   </div>
                 </div>
@@ -188,39 +252,106 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
                 <img src={imageData} alt="Captured crop" />
                 <button className="retake-btn" onClick={retakePhoto}>
                   <X size={16} />
-                  {t("camera.retake") || "Retake"}
+                  Retake
                 </button>
               </div>
             )}
           </div>
 
-          {/* Text Input */}
-          <div className="text-input-section">
-            <label className="text-input-label">
-              <ImageIcon size={16} />
-              {t("imageUpload.messageLabel") || "Add a message (optional)"}
-            </label>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={t("imageUpload.messagePlaceholder") || "Describe your crop or ask a question..."}
-              className="message-textarea"
-              rows={3}
-            />
+          {/* Message Mode Toggle */}
+          <div className="message-mode-selector">
+            <button
+              className={`message-mode-btn ${messageMode === "text" ? "active" : ""}`}
+              onClick={() => {
+                setMessageMode("text");
+                if (isRecording) stopRecording();
+              }}
+            >
+              <MessageSquare size={16} />
+              Text Message
+            </button>
+            <button
+              className={`message-mode-btn ${messageMode === "voice" ? "active" : ""}`}
+              onClick={() => {
+                setMessageMode("voice");
+                setText("");
+              }}
+            >
+              <Mic size={16} />
+              Voice Message
+            </button>
           </div>
+
+          {/* Text or Voice Input */}
+          {messageMode === "text" ? (
+            <div className="text-input-section">
+              <label className="text-input-label">
+                <MessageSquare size={16} />
+                Add a message (optional)
+              </label>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Describe your crop or ask a question..."
+                className="message-textarea"
+                rows={3}
+              />
+            </div>
+          ) : (
+            <div className="voice-input-section">
+              <label className="text-input-label">
+                <Mic size={16} />
+                Add a voice message (optional)
+              </label>
+              {!audioBlob ? (
+                <div className="voice-recording-area">
+                  {!isRecording ? (
+                    <button className="start-recording-btn" onClick={startRecording}>
+                      <Mic size={20} />
+                      <span>Tap to record</span>
+                    </button>
+                  ) : (
+                    <div className="recording-indicator">
+                      <div className="recording-pulse"></div>
+                      <span className="recording-time">
+                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, "0")}
+                      </span>
+                      <button className="stop-recording-btn" onClick={stopRecording}>
+                        Stop Recording
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="audio-preview">
+                  <div className="audio-info">
+                    <Mic size={16} />
+                    <span>Voice message recorded ({recordingTime}s)</span>
+                  </div>
+                  <button className="delete-audio-btn" onClick={deleteRecording}>
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="image-upload-actions">
           <button className="cancel-btn" onClick={handleClose}>
-            {t("common.cancel") || "Cancel"}
+            Cancel
           </button>
           <button 
             className="send-btn" 
             onClick={handleSend}
-            disabled={!text.trim() && !imageData}
+            disabled={
+              messageMode === "text" 
+                ? (!text.trim() && !imageData) 
+                : (!audioBlob && !imageData)
+            }
           >
             <Send size={16} />
-            {t("imageUpload.send") || "Send"}
+            Send
           </button>
         </div>
 
