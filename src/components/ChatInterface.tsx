@@ -1,6 +1,7 @@
-import React from "react";
-import { Bot, User, Loader2 } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Bot, User, Loader2, Play, Pause } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
 import "./ChatInterface.css";
 
 interface Message {
@@ -9,6 +10,7 @@ interface Message {
   content: string;
   timestamp: Date;
   imageUrl?: string;
+  audioData?: string;
   imageAnalysis?: {
     health_score?: number;
     disease_detected?: string;
@@ -28,12 +30,45 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messagesEndRef,
 }) => {
   const { t } = useTranslation();
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   const formatTime = (timestamp: Date) => {
     return timestamp.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const toggleAudio = (messageId: string, audioData: string) => {
+    const audio = audioRefs.current.get(messageId);
+    
+    if (audio) {
+      if (playingAudio === messageId) {
+        audio.pause();
+        setPlayingAudio(null);
+      } else {
+        // Pause any currently playing audio
+        audioRefs.current.forEach((audioElement, id) => {
+          if (id !== messageId) {
+            audioElement.pause();
+          }
+        });
+        audio.play();
+        setPlayingAudio(messageId);
+      }
+    } else {
+      // Create new audio element
+      const newAudio = new Audio(`data:audio/mp3;base64,${audioData}`);
+      newAudio.onended = () => setPlayingAudio(null);
+      newAudio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        setPlayingAudio(null);
+      };
+      audioRefs.current.set(messageId, newAudio);
+      newAudio.play();
+      setPlayingAudio(messageId);
+    }
   };
 
   return (
@@ -68,8 +103,31 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 </div>
               )}
               
-              {/* Display text content */}
-              <p>{message.content}</p>
+              {/* Display text content with markdown support */}
+              <div className="message-text">
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </div>
+              
+              {/* Display audio player if audio is available */}
+              {message.audioData && (
+                <div className="audio-player">
+                  <button
+                    className="audio-play-btn"
+                    onClick={() => toggleAudio(message.id, message.audioData!)}
+                    title={playingAudio === message.id ? "Pause" : "Play"}
+                  >
+                    {playingAudio === message.id ? (
+                      <Pause size={16} />
+                    ) : (
+                      <Play size={16} />
+                    )}
+                  </button>
+                  <span className="audio-label">
+                    {playingAudio === message.id ? t("audio.playing") || "Playing..." : t("audio.clickToPlay") || "Click to play audio"}
+                  </span>
+                </div>
+              )}
+              
               <span className="message-time">
                 {formatTime(message.timestamp)}
               </span>

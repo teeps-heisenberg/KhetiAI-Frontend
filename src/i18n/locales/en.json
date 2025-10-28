@@ -85,7 +85,17 @@
     "listening": "Listening... Speak now",
     "tapToSend": "Tap to send:",
     "tapToStart": "Tap to start voice input",
-    "browserError": "Speech recognition is not supported in your browser. Please use Chrome or Edge."
+    "browserError": "Speech recognition is not supported in your browser. Please use Chrome or Edge.",
+    "permissionError": "Could not access microphone. Please check permissions.",
+    "waiting": "Processing response, please wait..."
+  },
+  "chat": {
+    "thinking": "KhetiAI is thinking...",
+    "waiting": "Processing response..."
+  },
+  "audio": {
+    "playing": "Playing...",
+    "clickToPlay": "Click to play audio"
   },
   "responses": {
     "soilMoisture": "Based on your crop conditions, I recommend checking the soil moisture levels. The ideal range for most crops is between 40-60%.",

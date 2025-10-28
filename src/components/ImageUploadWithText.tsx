@@ -21,13 +21,16 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [finalRecordingTime, setFinalRecordingTime] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
 
   const startCamera = async () => {
     try {
@@ -98,26 +101,42 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
 
   const startRecording = async () => {
     try {
-      const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(audioStream);
-      const audioChunks: BlobPart[] = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setAudioStream(stream);
+      
+      // Clear previous audio chunks
+      audioChunksRef.current = [];
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunks.push(event.data);
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        setAudioBlob(audioBlob);
-        audioStream.getTracks().forEach((track) => track.stop());
+        // Ensure we have all chunks
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          setAudioBlob(audioBlob);
+          // Save the current recording time as final time
+          setFinalRecordingTime(recordingTime);
+        }
+        // Stop audio stream
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          setAudioStream(null);
+        }
       };
 
       mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
+      mediaRecorder.start(100); // Request data every 100ms for more reliable chunk collection
       setIsRecording(true);
       setRecordingTime(0);
+      setFinalRecordingTime(0);
 
       // Start recording timer
       recordingIntervalRef.current = setInterval(() => {
@@ -130,8 +149,14 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+    if (mediaRecorderRef.current && isRecording && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        // Request all available data before stopping
+        mediaRecorderRef.current.requestData();
+        mediaRecorderRef.current.stop();
+      } catch (error) {
+        console.error("Error stopping recording:", error);
+      }
       setIsRecording(false);
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current);
@@ -143,6 +168,8 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   const deleteRecording = () => {
     setAudioBlob(null);
     setRecordingTime(0);
+    setFinalRecordingTime(0);
+    audioChunksRef.current = [];
   };
 
   const handleSend = () => {
@@ -165,6 +192,11 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
     stopCamera();
     if (isRecording) {
       stopRecording();
+    }
+    // Clean up audio stream if still active
+    if (audioStream) {
+      audioStream.getTracks().forEach((track) => track.stop());
+      setAudioStream(null);
     }
     onClose();
   };
@@ -326,7 +358,7 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
                 <div className="audio-preview">
                   <div className="audio-info">
                     <Mic size={16} />
-                    <span>Voice message recorded ({recordingTime}s)</span>
+                    <span>Voice message recorded ({finalRecordingTime || recordingTime}s)</span>
                   </div>
                   <button className="delete-audio-btn" onClick={deleteRecording}>
                     <X size={16} />

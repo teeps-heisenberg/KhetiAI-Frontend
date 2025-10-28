@@ -119,6 +119,8 @@
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   min-height: 500px;
+  max-height: 70vh;  /* Limit height to enable scrolling */
+  height: 70vh;  /* Set fixed height */
 }
 
 .chat-container {
@@ -127,6 +129,29 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-green) var(--bg-secondary);
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+.chat-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 5px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: var(--primary-green);
+  border-radius: 5px;
+  border: 2px solid var(--bg-secondary);
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-green);
 }
 
 /* Welcome Message */
@@ -267,6 +292,24 @@
   background-color: var(--border-light);
   cursor: not-allowed;
   transform: none;
+  opacity: 0.6;
+}
+
+.camera-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.text-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-secondary);
+}
+
+.text-input:disabled::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.7;
 }
 
 .camera-btn {
@@ -295,6 +338,11 @@
   .home-container {
     padding: var(--space-4) var(--space-4);
     gap: var(--space-6);
+  }
+
+  .chat-section {
+    max-height: 60vh;  /* Slightly smaller on tablet */
+    height: 60vh;
   }
 
   .hero-section {
@@ -343,9 +391,20 @@
   .camera-btn {
     align-self: flex-end;
   }
+
+  /* Thinner scrollbar on mobile */
+  .chat-container::-webkit-scrollbar {
+    width: 6px;
+  }
 }
 
 @media (max-width: 480px) {
+  .chat-section {
+    max-height: 50vh;  /* Smaller on mobile */
+    height: 50vh;
+    min-height: 400px;
+  }
+
   .hero-badge {
     font-size: var(--font-size-xs);
     padding: var(--space-2) var(--space-3);
@@ -367,5 +426,10 @@
   .welcome-icon svg {
     width: 24px;
     height: 24px;
+  }
+
+  /* Even thinner scrollbar on small screens */
+  .chat-container::-webkit-scrollbar {
+    width: 4px;
   }
 }

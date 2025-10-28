@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, VolumeX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./VoiceInterface.css";
@@ -7,17 +7,20 @@ interface VoiceInterfaceProps {
   onVoiceInput: (transcript: string) => void;
   isListening: boolean;
   setIsListening: (listening: boolean) => void;
+  disabled?: boolean;
 }
 
 const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   onVoiceInput,
   isListening,
   setIsListening,
+  disabled = false,
 }) => {
   const { t, i18n } = useTranslation();
   const [isSupported, setIsSupported] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const transcriptRef = useRef("");
 
   useEffect(() => {
     // Check if browser supports speech recognition
@@ -27,6 +30,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   }, []);
 
   const startListening = () => {
+    if (disabled || isProcessing) return;
     if (!isSupported) {
       alert(t("voice.browserError"));
       return;
@@ -44,6 +48,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
     recognition.onstart = () => {
       setIsListening(true);
       setTranscript("");
+      transcriptRef.current = "";
     };
 
     recognition.onresult = (event: any) => {
@@ -59,18 +64,21 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         }
       }
 
-      setTranscript(finalTranscript || interimTranscript);
+      const currentTranscript = finalTranscript || interimTranscript;
+      transcriptRef.current = currentTranscript;
+      setTranscript(currentTranscript);
     };
 
     recognition.onend = () => {
       setIsListening(false);
-      if (transcript.trim()) {
+      // Use ref to get the latest transcript value
+      const finalTranscript = transcriptRef.current.trim();
+      if (finalTranscript) {
         setIsProcessing(true);
-        setTimeout(() => {
-          onVoiceInput(transcript);
-          setTranscript("");
-          setIsProcessing(false);
-        }, 500);
+        onVoiceInput(finalTranscript);
+        setTranscript("");
+        transcriptRef.current = "";
+        setIsProcessing(false);
       }
     };
 
@@ -86,6 +94,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
   const stopListening = () => {
     setIsListening(false);
     setTranscript("");
+    transcriptRef.current = "";
   };
 
   if (!isSupported) {
@@ -104,9 +113,9 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         <button
           className={`voice-btn ${isListening ? "listening" : ""} ${
             isProcessing ? "processing" : ""
-          }`}
+          } ${disabled ? "disabled" : ""}`}
           onClick={isListening ? stopListening : startListening}
-          disabled={isProcessing}
+          disabled={disabled || isProcessing}
         >
           {isProcessing ? (
             <VolumeX size={24} />
@@ -118,7 +127,11 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({
         </button>
 
         <div className="voice-status">
-          {isProcessing ? (
+          {disabled ? (
+            <span className="status-text disabled">
+              {t("voice.waiting") || "Processing response..."}
+            </span>
+          ) : isProcessing ? (
             <span className="status-text processing">
               {t("voice.processing")}
             </span>

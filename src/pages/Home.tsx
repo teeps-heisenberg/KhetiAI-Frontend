@@ -17,6 +17,7 @@ const Home: React.FC = () => {
       content: string;
       timestamp: Date;
       imageUrl?: string;
+      audioData?: string; // Base64 encoded audio
       imageAnalysis?: {
         health_score?: number;
         disease_detected?: string;
@@ -48,7 +49,8 @@ const Home: React.FC = () => {
       health_score?: number;
       disease_detected?: string;
       growth_stage?: string;
-    }
+    },
+    audioData?: string
   ) => {
     const newMessage = {
       id: Date.now().toString(),
@@ -57,6 +59,7 @@ const Home: React.FC = () => {
       timestamp: new Date(),
       imageUrl,
       imageAnalysis,
+      audioData,
     };
     setMessages((prev) => [...prev, newMessage]);
   };
@@ -75,13 +78,14 @@ const Home: React.FC = () => {
         "voice"
       );
 
-      // Add AI response to chat
-      addMessage(response.response, "assistant");
-
-      // Play audio response if available
-      if (response.audio_response) {
-        apiService.playAudioFromBase64(response.audio_response);
-      }
+      // Add AI response to chat with audio
+      addMessage(
+        response.response, 
+        "assistant", 
+        undefined, 
+        undefined, 
+        response.audio_response || undefined
+      );
     } catch (error) {
       console.error("Error processing voice input:", error);
       addMessage(
@@ -175,13 +179,14 @@ const Home: React.FC = () => {
             return updated;
           });
           
-          // Add AI response
-          addMessage(response.response, "assistant");
-          
-          // Play audio response if available
-          if (response.audio_response) {
-            apiService.playAudioFromBase64(response.audio_response);
-          }
+          // Add AI response with audio
+          addMessage(
+            response.response, 
+            "assistant", 
+            undefined, 
+            undefined, 
+            response.audio_response || undefined
+          );
         } else if (audioData) {
           // Only voice provided
           addMessage("Processing voice...", "user");
@@ -197,11 +202,13 @@ const Home: React.FC = () => {
             return updated;
           });
           
-          addMessage(response.response, "assistant");
-          
-          if (response.audio_response) {
-            apiService.playAudioFromBase64(response.audio_response);
-          }
+          addMessage(
+            response.response, 
+            "assistant", 
+            undefined, 
+            undefined, 
+            response.audio_response || undefined
+          );
         } else if (imageData) {
           // Only image provided
           addMessage(text || "Analyzing crop image...", "user", imageData);
@@ -312,15 +319,17 @@ const Home: React.FC = () => {
                 onVoiceInput={handleVoiceInput}
                 isListening={isListening}
                 setIsListening={setIsListening}
+                disabled={isLoading}
               />
             ) : (
               <div className="text-input-container">
                 <input
                   type="text"
-                  placeholder={t("home.textInputPlaceholder")}
+                  placeholder={isLoading ? (t("chat.waiting") || "Processing response...") : t("home.textInputPlaceholder")}
                   className="text-input"
+                  disabled={isLoading}
                   onKeyPress={(e) => {
-                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                    if (!isLoading && e.key === "Enter" && e.currentTarget.value.trim()) {
                       handleTextInput(e.currentTarget.value);
                       e.currentTarget.value = "";
                     }
@@ -328,7 +337,9 @@ const Home: React.FC = () => {
                 />
                 <button
                   className="send-btn"
+                  disabled={isLoading}
                   onClick={(e) => {
+                    if (isLoading) return;
                     const input = e.currentTarget
                       .previousElementSibling as HTMLInputElement;
                     if (input.value.trim()) {
@@ -346,7 +357,8 @@ const Home: React.FC = () => {
             <button
               className="camera-btn"
               onClick={() => setIsImageUploadOpen(true)}
-              title="Upload image with message"
+              disabled={isLoading}
+              title={isLoading ? "Please wait..." : "Upload image with message"}
             >
               <ImageIcon size={20} />
             </button>
