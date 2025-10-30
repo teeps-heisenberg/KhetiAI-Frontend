@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Camera, Upload, X, Send, Image as ImageIcon, Mic, MessageSquare } from "lucide-react";
+import { Camera, Upload, X, Send, Mic, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "./ImageUploadWithText.css";
 
@@ -29,7 +29,7 @@ const ImageUploadWithText: React.FC<ImageUploadWithTextProps> = ({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
 
   const startCamera = async () => {
