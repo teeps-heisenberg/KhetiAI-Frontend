@@ -6,6 +6,7 @@ import VoiceInterface from "../components/VoiceInterface";
 import CameraInterface from "../components/CameraInterface";
 import ImageUploadWithText from "../components/ImageUploadWithText";
 import apiService from "../services/api";
+import type { VoiceChatResponse, CropAnalysisResponse } from "../services/api";
 import "./Home.css";
 
 const Home: React.FC = () => {
@@ -159,7 +160,7 @@ const Home: React.FC = () => {
       setIsLoading(true);
 
       try {
-        let response;
+        let response: VoiceChatResponse | CropAnalysisResponse;
 
         if (audioData && imageData) {
           // Both voice and image provided
@@ -173,7 +174,7 @@ const Home: React.FC = () => {
           // Update the last message with the transcript
           setMessages((prev) => {
             const updated = [...prev];
-            if (updated.length > 0) {
+            if (updated.length > 0 && 'transcript' in response) {
               updated[updated.length - 1].content = response.transcript;
             }
             return updated;
@@ -196,7 +197,7 @@ const Home: React.FC = () => {
           // Update with transcript
           setMessages((prev) => {
             const updated = [...prev];
-            if (updated.length > 0) {
+            if (updated.length > 0 && 'transcript' in response) {
               updated[updated.length - 1].content = response.transcript;
             }
             return updated;
